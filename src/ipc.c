@@ -43,6 +43,15 @@ void createIPC(ipc_wrapper *ipc, parameters params)
 
     ipc->sem_mutex_rd = semget(IPC_PRIVATE, 1, IPC_CREAT | 0666);
     init_sem_available(ipc->sem_mutex_rd, 0);
+
+    ipc->sem_in = semget(IPC_PRIVATE, 1, IPC_CREAT | 0666);
+    init_sem_available(ipc->sem_in, 0);
+
+    ipc->sem_reader_mutex = semget(IPC_PRIVATE, 1, IPC_CREAT | 0666);
+    init_sem_available(ipc->sem_reader_mutex, 0);
+
+    ipc->reader_counter = 0;
+    
 }
 
 /**
@@ -66,6 +75,8 @@ void delete_ipc(ipc_wrapper *ipc, parameters params)
     semctl(ipc->sem_wrt, 0, IPC_RMID);
     semctl(ipc->sem_book_update, 0, IPC_RMID);
     semctl(ipc->sem_mutex_rd, 0, IPC_RMID);
+    semctl(ipc->sem_in, 0, IPC_RMID);
+    semctl(ipc->sem_reader_mutex, 0, IPC_RMID);
 }
 
 /**

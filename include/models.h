@@ -6,10 +6,10 @@
 
 typedef struct _transaction {
 
-    int timestamp;
-    int sender;
-    int receiver;
-    int money_sum;
-    int paid_reward;
+    unsigned int timestamp;
+    unsigned int sender;
+    unsigned int receiver;
+    unsigned int money_sum;
+    unsigned int paid_reward;
 
 } transaction;

@@ -37,6 +37,10 @@ typedef struct _ipc_wrapper
 	int sem_wrt;
 	int sem_mutex_rd;
 
+	int sem_in;
+	int sem_reader_mutex;
+	int reader_counter;
+
 } ipc_wrapper;
 
 void createIPC(ipc_wrapper *ipc, parameters);

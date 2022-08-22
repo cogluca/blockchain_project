@@ -4,7 +4,6 @@
 #include <include/models.h>
 #include <include/bookkeeper.h>
 #include <include/utils.h>
-
 #include <stdlib.h>
 #include <sys/shm.h>
 #include <stdio.h>
@@ -12,6 +11,7 @@
 #include <math.h>
 #include <include/simulation_stats.h>
 #include <signal.h>
+#include <unistd.h>
 
 parameters params;
 simulation_stats *statistics;
@@ -21,13 +21,23 @@ ipc_wrapper *ipcs;
 int user_id;
 int sent_transaction_money;
 
-int calculate_budget(bookkeeper *book, int user_id, int sent_transaction_money)
+int calculate_budget(bookkeeper *book, int user_id, int sent_transaction_money, int reader_counter)
 {
     int new_budget = params.SO_BUDGET_INIT;
 
     int i, j, size;
     
     size = book->size;
+
+    reserve_sem(ipcs->sem_in, 0, 1);
+    reserve_sem(ipcs->sem_reader_mutex, 0, 1);
+
+    if((++reader_counter) == 1) {
+        reserve_sem(ipcs->sem_book_update, 0, 1);
+    }
+
+    release_sem(ipcs->sem_reader_mutex, 0, 1);
+    release_sem(ipcs->sem_in, 0, 1);
 
     for (i = 0; i < size; i++)
     {
@@ -46,6 +56,12 @@ int calculate_budget(bookkeeper *book, int user_id, int sent_transaction_money)
             }
         }
     }
+
+    reserve_sem(ipcs->sem_reader_mutex, 0, 1);
+    if((--reader_counter) == 0){
+        release_sem(ipcs->sem_book_update, 0, 1);
+    }
+    release_sem(ipcs->sem_reader_mutex, 0, 1);
 
     new_budget -= sent_transaction_money;
     return new_budget;
@@ -93,7 +109,10 @@ transaction send_random_transaction(int user_id, int *node_queues, transaction t
     dest_node = my_random(0, params.SO_NODES_NUM - 1);
 
     send_function(message, node_queues[dest_node], 1, &t);
-    nanosleep(&s, NULL);
+
+    if(nanosleep(&s, NULL) < 0){
+        printf("Failed to nanosleep\n");
+    }
 
     return t;
 }
@@ -103,7 +122,7 @@ void handler()
     printf("HANDLING SIGNAL --- Creating and sending a random transaction \n");
     transaction t;
 
-    int budget = calculate_budget(book, user_id, sent_transaction_money);
+    int budget = calculate_budget(book, user_id, sent_transaction_money, ipcs->reader_counter);
 
     if (budget > 2)
     {
@@ -151,7 +170,8 @@ int main(int argc, char *argv[])
         int i = 0;
         transaction t;
 
-        budget = calculate_budget(book, user_id, sent_transaction_money);
+        budget = calculate_budget(book, user_id, sent_transaction_money, ipcs->reader_counter);
+        
         if (budget < 2)
         {
             num_consecutive_attempt++;

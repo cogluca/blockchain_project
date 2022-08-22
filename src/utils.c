@@ -2,10 +2,6 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <time.h>
-int my_random(int min_val, int max_val)
-{
-    return min_val + (int)((double)rand() / RAND_MAX * (max_val - min_val + 1));
-}
 
 void set_seed(){
 
@@ -16,3 +12,9 @@ void set_seed(){
     srand(seed);
 
 }
+int my_random(int min_val, int max_val)
+{
+    set_seed();
+    return min_val + (int)((double)rand() / RAND_MAX * (max_val - min_val + 1));
+}
+

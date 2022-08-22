@@ -39,7 +39,7 @@ void create_reward_transaction(transaction_block *block, int node_id)
     block->_transaction_array[SO_BLOCK_SIZE - 1] = t;
 }
 
-void start_simulation(int queueId, transaction_pool *pool, int user_queue, int shm_book, int sem_id, int node_id, simulation_stats* stats, int sem_wrt, int sem_mutex_rd)
+void start_simulation(int queueId, transaction_pool *pool, int user_queue, int shm_book, int sem_id, int node_id, simulation_stats* stats, int sem_wrt, int sem_mutex_rd, int sem_in, int sem_reader_mutex)
 {
     struct msgbuf message;
     struct timespec s;
@@ -84,6 +84,7 @@ void start_simulation(int queueId, transaction_pool *pool, int user_queue, int s
 
 
                 /* Move block in bookkeeper in mutual esclusion */
+                reserve_sem(sem_in, 0, 1);
                 reserve_sem(sem_id, 0, 1);
                 /*
                     no one will update book size in this moment because the only point of 
@@ -100,9 +101,11 @@ void start_simulation(int queueId, transaction_pool *pool, int user_queue, int s
                 {
                 
                     release_sem(sem_id, 0, 1);
+                    release_sem(sem_in,0,1);
                     break;
                 }
                 release_sem(sem_id, 0, 1);
+                release_sem(sem_in,0,1);
 
                 /*
                     Notify the user that send of the transaction is completed
@@ -164,7 +167,7 @@ int main(int argc, char *argv[])
 
     ipcs = (ipc_wrapper *)shmat(ipcs_id, NULL, 0);
     statistics = shmat(ipcs->shm_sim_stats, NULL, 0);
-    start_simulation(ipcs->node_queues[node_id], &private_pool, ipcs->user_queue, ipcs->shm_bookkeeper, ipcs->sem_book_update, node_id, statistics, ipcs->sem_wrt, ipcs->sem_mutex_rd);
+    start_simulation(ipcs->node_queues[node_id], &private_pool, ipcs->user_queue, ipcs->shm_bookkeeper, ipcs->sem_book_update, node_id, statistics, ipcs->sem_wrt, ipcs->sem_mutex_rd, ipcs->sem_in, ipcs->sem_reader_mutex);
     
     for(i = 0; i < private_pool.capacity; i++) {
         /* Add size */
