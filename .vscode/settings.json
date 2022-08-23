@@ -1,0 +1,25 @@
+{
+    "files.associations": {
+        "stdlib.h": "c",
+        "models.h": "c",
+        "sem.h": "c",
+        "ipc.h": "c",
+        "transaction_pool.h": "c",
+        "errno.h": "c",
+        "unistd.h": "c",
+        "msg.h": "c",
+        "stdio.h": "c",
+        "config.h": "c",
+        "parameters.h": "c",
+        "shm.h": "c",
+        "string.h": "c",
+        "time.h": "c",
+        "types.h": "c",
+        "math.h": "c",
+        "bookkeeper.h": "c",
+        "node.h": "c",
+        "user.h": "c",
+        "utils.h": "c",
+        "simulation_stats.h": "c"
+    }
+}

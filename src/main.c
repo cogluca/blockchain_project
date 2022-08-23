@@ -271,10 +271,7 @@ int main(int argc, char *argv[])
     }
 
 
-    /*
-     deallocazione memorie condiv
-     chiusura e cancellazione semafori
-    */
+    /* Waiting for children exit, signaled by a -1 as a return from wait(NULL)*/
     while(wait(NULL) > 0) { };
 
     /* Calculating statistics */
@@ -317,6 +314,10 @@ int main(int argc, char *argv[])
     }
     printf("\n%d of %d blocks used in bookkeeper\n", book->size, book->capacity);
 
+    /*
+     deallocazione memorie condiv
+     chiusura e cancellazione semafori
+    */
 
     shmdt(book);
     shmdt(statistics);
