@@ -30,14 +30,9 @@ int calculate_budget(bookkeeper *book, int user_id, int sent_transaction_money, 
     size = book->size;
 
     reserve_sem(ipcs->sem_in, 0, 1);
-    reserve_sem(ipcs->sem_reader_mutex, 0, 1);
-
-    if((++reader_counter) == 1) {
-        reserve_sem(ipcs->sem_book_update, 0, 1);
-    }
-
-    release_sem(ipcs->sem_reader_mutex, 0, 1);
+    ipcs->reader_counter++;
     release_sem(ipcs->sem_in, 0, 1);
+    
 
     for (i = 0; i < size; i++)
     {
@@ -58,7 +53,8 @@ int calculate_budget(bookkeeper *book, int user_id, int sent_transaction_money, 
     }
 
     reserve_sem(ipcs->sem_reader_mutex, 0, 1);
-    if((--reader_counter) == 0){
+    ipcs->reader_out++;
+    if((ipcs->writer_wait == 1) && (ipcs->reader_counter == ipcs->reader_out)){
         release_sem(ipcs->sem_book_update, 0, 1);
     }
     release_sem(ipcs->sem_reader_mutex, 0, 1);

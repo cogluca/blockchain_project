@@ -39,7 +39,7 @@ void create_reward_transaction(transaction_block *block, int node_id)
     block->_transaction_array[SO_BLOCK_SIZE - 1] = t;
 }
 
-void start_simulation(int queueId, transaction_pool *pool, int user_queue, int shm_book, int sem_id, int node_id, simulation_stats* stats, int sem_wrt, int sem_mutex_rd, int sem_in, int sem_reader_mutex)
+void start_simulation(int queueId, transaction_pool *pool, int user_queue, int shm_book, int sem_id, int node_id, simulation_stats* stats, int sem_wrt, int sem_mutex_rd, int sem_in, int sem_reader_mutex, ipc_wrapper* ipcs)
 {
     struct msgbuf message;
     struct timespec s;
@@ -85,12 +85,22 @@ void start_simulation(int queueId, transaction_pool *pool, int user_queue, int s
 
                 /* Move block in bookkeeper in mutual esclusion */
                 reserve_sem(sem_in, 0, 1);
-                reserve_sem(sem_id, 0, 1);
+                reserve_sem(sem_reader_mutex, 0, 1);
                 /*
                     no one will update book size in this moment because the only point of 
                     update in all code is here, and for accessing it, it is needed
                     a semaphore
                 */
+               if(ipcs->reader_counter == ipcs->reader_out){
+                   release_sem(ipcs->sem_reader_mutex, 0, 1);
+               }
+                else{
+                    ipcs->writer_wait = 1;
+                    release_sem(ipcs->sem_reader_mutex, 0, 1);
+                    reserve_sem(sem_id, 0, 1);
+                    ipcs->writer_wait = 0;
+                }
+
                 if (book->size < book->capacity)
                 {
                     pool->pool_blocks[block_id].block_id = book->size;
@@ -100,11 +110,9 @@ void start_simulation(int queueId, transaction_pool *pool, int user_queue, int s
                 else
                 {
                 
-                    release_sem(sem_id, 0, 1);
                     release_sem(sem_in,0,1);
                     break;
                 }
-                release_sem(sem_id, 0, 1);
                 release_sem(sem_in,0,1);
 
                 /*
@@ -167,7 +175,7 @@ int main(int argc, char *argv[])
 
     ipcs = (ipc_wrapper *)shmat(ipcs_id, NULL, 0);
     statistics = shmat(ipcs->shm_sim_stats, NULL, 0);
-    start_simulation(ipcs->node_queues[node_id], &private_pool, ipcs->user_queue, ipcs->shm_bookkeeper, ipcs->sem_book_update, node_id, statistics, ipcs->sem_wrt, ipcs->sem_mutex_rd, ipcs->sem_in, ipcs->sem_reader_mutex);
+    start_simulation(ipcs->node_queues[node_id], &private_pool, ipcs->user_queue, ipcs->shm_bookkeeper, ipcs->sem_book_update, node_id, statistics, ipcs->sem_wrt, ipcs->sem_mutex_rd, ipcs->sem_in, ipcs->sem_reader_mutex, ipcs);
     
     for(i = 0; i < private_pool.capacity; i++) {
         /* Add size */

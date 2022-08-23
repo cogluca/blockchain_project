@@ -40,6 +40,9 @@ typedef struct _ipc_wrapper
 	int sem_in;
 	int sem_reader_mutex;
 	int reader_counter;
+	int reader_out;
+
+	int writer_wait;
 
 } ipc_wrapper;
 

@@ -51,6 +51,8 @@ void createIPC(ipc_wrapper *ipc, parameters params)
     init_sem_available(ipc->sem_reader_mutex, 0);
 
     ipc->reader_counter = 0;
+    ipc->reader_out = 0;
+    ipc->writer_wait = 0;
     
 }
 
