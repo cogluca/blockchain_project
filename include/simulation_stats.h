@@ -1,5 +1,7 @@
 #pragma once
 
+#include <include/ipc.h>
+
 typedef struct _sim_stats {
     
     /* is user[i] still alive? */
@@ -19,4 +21,4 @@ typedef struct _sim_stats {
 } simulation_stats;
 
 
-int is_simulation_running_read(simulation_stats *statistics, int wrt_id, int rd_id);
+int is_simulation_running_read(simulation_stats *statistics, ipc_wrapper* ipcs);

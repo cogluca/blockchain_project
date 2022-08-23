@@ -50,7 +50,7 @@ void start_simulation(int queueId, transaction_pool *pool, int user_queue, int s
     bookkeeper *book;
     book = shmat(shm_book, NULL, 0);
 
-    while (is_simulation_running_read(stats, sem_wrt, sem_mutex_rd))
+    while (is_simulation_running_read(stats, ipcs))
     {
         /* If there is a message to read */
         if (receive_function(&message, queueId, 1) != -1)

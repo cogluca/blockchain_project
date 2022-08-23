@@ -161,7 +161,7 @@ int main(int argc, char *argv[])
         1. La transaction pool del nodo scelto è piena
         2. Il saldo dell'utente è inferiore a 2
     */
-    while (num_consecutive_attempt < params.SO_RETRY && is_simulation_running_read(statistics, ipcs->sem_wrt, ipcs->sem_mutex_rd))
+    while (num_consecutive_attempt < params.SO_RETRY && is_simulation_running_read(statistics, ipcs))
     {
         int i = 0;
         transaction t;

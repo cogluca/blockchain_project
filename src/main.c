@@ -139,10 +139,22 @@ void handler()
     if (params.SO_SIM_SEC == 0 || book->size >= book->capacity - 1 || count_user == 0)
     {
         /** Critical section */
-        reserve_sem(ipcs->sem_wrt, 0,1);
+        reserve_sem(ipcs->sem_in_sim,0,1);
+        reserve_sem(ipcs->sem_out_sim, 0, 1);
+        if(ipcs->child_in_sim == ipcs->child_out_sim){
+            release_sem(ipcs->sem_out_sim, 0, 1);
+        }
+        else{
+            ipcs->master_wait_sim = 1;
+            release_sem(ipcs->sem_out_sim, 0, 1);
+            reserve_sem(ipcs->sem_wrt, 0, 1);
+            ipcs->master_wait_sim= 0;
+        }
+
+    
         statistics->is_simulation_running = 0;
 
-        release_sem(ipcs->sem_wrt, 0,1);
+        release_sem(ipcs->sem_in_sim, 0, 1);
 
         alarm(0);
     }

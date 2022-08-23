@@ -34,15 +34,24 @@ typedef struct _ipc_wrapper
 	/* Used from nodes to write on bookkeeper in mutual exclusion */
 	int sem_book_update;
 
-	int sem_wrt;
+	
 	int sem_mutex_rd;
 
+	/* user-node synchronization semaphores and counters*/
 	int sem_in;
 	int sem_reader_mutex;
 	int reader_counter;
 	int reader_out;
-
 	int writer_wait;
+
+	/*master-children synchronization semaphores and counters */
+
+	int sem_in_sim;
+	int sem_out_sim;
+	int child_in_sim;
+	int child_out_sim;
+	int master_wait_sim;
+	int sem_wrt;
 
 } ipc_wrapper;
 

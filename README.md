@@ -21,5 +21,8 @@ Attraverso un alarm ogni secondo nel master, viene attivato un handler di SIG_AL
 
 Ed infine avviene la stampa riassuntiva finale.
 
+## Additional sources
 
+[Link to paper proposing a solution to multiple readers-writers synchronization with no starvation for writers](https://arxiv.org/pdf/1309.4507.pdf)
 
+The paper can also be seen in the project folder at the root level, it's called No Writer Starvation Paper. pdf
